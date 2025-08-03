@@ -63,12 +63,27 @@ export const connectDatabase = async (): Promise<void> => {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-snippets';
     
-    await mongoose.connect(mongoUri);
+    // Set connection timeout
+    const connectionPromise = mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 2000, // 2 seconds timeout
+      connectTimeoutMS: 2000,
+    });
+
+    // Race against timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Connection timeout')), 3000);
+    });
+
+    await Promise.race([connectionPromise, timeoutPromise]);
     
     console.log('Connected to MongoDB');
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    process.exit(1);
+    console.log('Continuing without database for development...');
+    // Don't exit in development mode
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
   }
 };
 
