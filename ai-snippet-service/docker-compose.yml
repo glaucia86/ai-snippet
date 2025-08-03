@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database
   mongodb:
@@ -30,14 +28,14 @@ services:
     container_name: ai-snippets-api
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
       NODE_ENV: production
-      API_PORT: 3000
+      API_PORT: 3001
       MONGODB_URI: mongodb://mongodb:27017/ai-snippets
       AI_PROVIDER: ${AI_PROVIDER:-github}
       # GitHub Models (recommended)
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_MODELS_TOKEN: ${GITHUB_MODELS_TOKEN}
       GITHUB_MODELS_ENDPOINT: ${GITHUB_MODELS_ENDPOINT:-https://models.inference.ai.azure.com}
       GITHUB_MODEL_NAME: ${GITHUB_MODEL_NAME:-gpt-4o}
       # OpenAI (alternative)
@@ -51,7 +49,7 @@ services:
     volumes:
       - ./logs:/app/logs
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -69,7 +67,7 @@ services:
     environment:
       NODE_ENV: production
       UI_PORT: 3030
-      API_BASE_URL: http://api:3000
+      API_BASE_URL: http://api:3001
     depends_on:
       api:
         condition: service_healthy
@@ -94,7 +92,7 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/ai-snippets-test
       AI_PROVIDER: github
       # Use mock values for tests
-      GITHUB_TOKEN: ghp-test-token-for-testing
+      GITHUB_MODELS_TOKEN: ghp-test-token-for-testing
       GITHUB_MODELS_ENDPOINT: https://test-endpoint.com
       GITHUB_MODEL_NAME: gpt-4o
       # Fallback for OpenAI tests
@@ -105,9 +103,7 @@ services:
     networks:
       - ai-snippets-network
     command: ["npm", "test"]
-    volumes:
-      - ./src:/app/src
-      - ./coverage:/app/coverage
+    profiles: ["test"]
 
 networks:
   ai-snippets-network:
