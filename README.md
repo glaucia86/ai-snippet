@@ -52,7 +52,7 @@ nano .env  # Add your GITHUB_MODELS_TOKEN
 ./scripts/docker-dev.sh
 ```
 
-### Option 2: Local Development
+### Option 2: Local Development (Recommended)
 
 ```bash
 # Install dependencies
