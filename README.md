@@ -25,6 +25,8 @@
   Built with Express.js backend, Remix frontend, and GitHub Models integration using GPT-4o for intelligent text summarization.
 </p>
 
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
