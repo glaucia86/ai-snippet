@@ -1,0 +1,58 @@
+# Frontend Dockerfile
+FROM node:20-alpine AS base
+
+# Install dumb-init
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm ci
+
+# Copy source code
+COPY app/ ./app/
+COPY public/ ./public/
+COPY remix.config.js ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
+COPY tsconfig.json ./
+
+# Build the application
+RUN npm run build:ui
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Install dumb-init
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S remix -u 1001
+
+WORKDIR /app
+
+# Copy only production dependencies
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built application
+COPY --from=base --chown=remix:nodejs /app/build ./build
+COPY --from=base --chown=remix:nodejs /app/public ./public
+
+# Switch to non-root user
+USER remix
+
+# Expose port
+EXPOSE 3030
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3030', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Start the application
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["npx", "remix-serve", "build", "--port", "3030", "--host", "0.0.0.0"]
