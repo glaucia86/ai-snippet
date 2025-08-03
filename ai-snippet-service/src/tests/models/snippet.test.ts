@@ -22,11 +22,11 @@ describe('Snippet Model', () => {
       summary: 'Test summary without text'
     });
 
-    let error;
+    let error: unknown;
     try {
       await snippet.save();
-    } catch (error: unknown) {
-      error = error;
+    } catch (err: unknown) {
+      error = err;
     }
 
     expect(error).toBeDefined();
