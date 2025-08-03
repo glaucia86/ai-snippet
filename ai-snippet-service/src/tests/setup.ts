@@ -1,19 +1,15 @@
-// Test setup file
+
 import mongoose from 'mongoose';
 
-// Mock para o banco de dados MongoDB (será substituído por mongodb-memory-server quando instalado)
 beforeAll(async () => {
-  // Para testes sem banco real por enquanto
   console.log('Setting up tests...');
 });
 
 beforeEach(async () => {
-  // Limpar dados entre testes
   console.log('Cleaning up before each test...');
 });
 
 afterAll(async () => {
-  // Cleanup após todos os testes
   console.log('Cleaning up after all tests...');
 });
 
