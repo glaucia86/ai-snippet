@@ -1,11 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { AIService } from './src/services/ai-service';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.API_PORT || 3001;
+
+// Initialize AI Service
+const aiService = new AIService();
 
 // Middleware
 app.use(cors());
@@ -43,7 +47,7 @@ app.get('/snippets', (req, res) => {
 });
 
 // Mock snippets endpoint - POST new snippet
-app.post('/snippets', (req, res) => {
+app.post('/snippets', async (req, res) => {
   try {
     const { text } = req.body;
     
@@ -53,8 +57,18 @@ app.post('/snippets', (req, res) => {
       });
     }
 
-    // Mock AI summary generation
-    const summary = `AI Summary: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`;
+    console.log('📝 Generating AI summary for text:', text.substring(0, 50) + '...');
+
+    // Use real AI service to generate summary
+    let summary: string;
+    try {
+      summary = await aiService.generateSummary(text.trim());
+      console.log('✅ AI Summary generated:', summary);
+    } catch (error) {
+      console.error('❌ AI Service failed, using fallback:', error);
+      // Fallback to simple summary if AI service fails
+      summary = `Summary: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`;
+    }
     
     const newSnippet = {
       id: (mockSnippets.length + 1).toString(),
@@ -65,6 +79,7 @@ app.post('/snippets', (req, res) => {
 
     mockSnippets.unshift(newSnippet); // Add to beginning of array
     
+    console.log('🎉 New snippet created:', { id: newSnippet.id, summary: newSnippet.summary });
     res.status(201).json(newSnippet);
   } catch (error) {
     console.error('Error creating snippet:', error);
@@ -93,6 +108,7 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 Test API running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`📝 Snippets: http://localhost:${PORT}/snippets`);
+  console.log(`🤖 AI Service: ${process.env.GITHUB_MODELS_TOKEN ? '✅ Configured' : '❌ Missing token'}`);
   console.log('🔄 Server is ready and listening for requests...');
 });
 

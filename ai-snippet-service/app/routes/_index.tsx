@@ -90,8 +90,8 @@ export const action: ActionFunction = async ({ request }) => {
 
     const snippet = await response.json();
     
-    // Redirect to the new snippet
-    return redirect(`/snippets/${snippet.id}`);
+    // Redirect to the snippets list page
+    return redirect(`/snippets`);
   } catch (error) {
     console.error('Error creating snippet, simulating success:', error);
     
@@ -106,7 +106,7 @@ export const action: ActionFunction = async ({ request }) => {
     // Store in session storage for demo purposes
     console.log('Created mock snippet:', mockSnippet);
     
-    // For demo, we'll redirect to snippets page instead
+    // Redirect to snippets page
     return redirect(`/snippets`);
   }
 };
