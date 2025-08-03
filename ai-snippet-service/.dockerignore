@@ -1,0 +1,61 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build outputs
+dist
+build
+coverage
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile*
+.dockerignore
+
+# Documentation
+README.md
+docs/
+
+# Scripts
+scripts/
+
+# Logs
+logs
+*.log
+
+# Test files (for production builds)
+**/*.test.ts
+**/*.test.js
+**/__tests__
+**/tests
+
+# Temporary files
+tmp/
+temp/
+
+# Remix specific
+.cache
+
+# Build artifacts
+*.tgz
+*.tar.gz
