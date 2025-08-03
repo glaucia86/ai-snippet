@@ -55,4 +55,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npx", "remix-serve", "build", "--port", "3030", "--host", "0.0.0.0"]
+CMD ["npx", "remix-serve", "build/index.js", "--port", "3030", "--host", "0.0.0.0"]
