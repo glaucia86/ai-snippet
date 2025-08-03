@@ -2,21 +2,27 @@ import { Snippet } from "../models/Snippet";
 import { AIService } from "./ai-service";
 import { SnippetService } from "./snippet.service";
 
-jest.mock("../services/ai-service");
-const MockedAIService = AIService as jest.MockedClass<typeof AIService>;
+// Mock do AIService
+jest.mock("./ai-service", () => {
+  return {
+    AIService: jest.fn().mockImplementation(() => ({
+      generateSummary: jest.fn(),
+    })),
+  };
+});
 
 describe("SnippetService", () => {
   let snippetService: SnippetService;
-  let mockAIService: jest.Mocked<AIService>;
+  let mockGenerateSummary: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockAIService = {
-      generateSummary: jest.fn(),
-    } as any;
-
-    MockedAIService.mockImplementation(() => mockAIService);
+    
+    const MockedAIService = AIService as jest.MockedClass<typeof AIService>;
+    mockGenerateSummary = jest.fn();
+    MockedAIService.mockImplementation(() => ({
+      generateSummary: mockGenerateSummary,
+    } as any));
 
     snippetService = new SnippetService();
   });
@@ -27,11 +33,11 @@ describe("SnippetService", () => {
         "This is a test text that needs to be summarized by AI service.";
       const expectedSummary = "AI-generated summary";
 
-      mockAIService.generateSummary.mockResolvedValue(expectedSummary);
+      mockGenerateSummary.mockResolvedValue(expectedSummary);
 
       const result = await snippetService.createSnippet(text);
 
-      expect(mockAIService.generateSummary).toHaveBeenCalledWith(text);
+      expect(mockGenerateSummary).toHaveBeenCalledWith(text);
       expect(result.text).toBe(text);
       expect(result.summary).toBe(expectedSummary);
       expect(result.id).toBeDefined();
@@ -39,7 +45,7 @@ describe("SnippetService", () => {
 
     it("should handle AI service errors", async () => {
       const text = "Test text";
-      mockAIService.generateSummary.mockRejectedValue(
+      mockGenerateSummary.mockRejectedValue(
         new Error("AI service error")
       );
 
@@ -90,7 +96,7 @@ describe("SnippetService", () => {
     });
   });
 
-  describe("getAllSnippets", async () => {
+  describe("getAllSnippets", () => {
     it("should return all snippets", async () => {
       const snippets = [
         new Snippet({ text: "Snippet 1", summary: "Summary 1" }),
