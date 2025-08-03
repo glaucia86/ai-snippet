@@ -3,25 +3,28 @@ import express from 'express';
 import { SnippetService } from '../services/snippet.service';
 import { snippetsRouter } from './snippet.route';
 
-jest.mock('../../services/SnippetService');
-const MockedSnippetService = SnippetService as jest.MockedClass<typeof SnippetService>;
-
-const app = express();
-app.use(express.json());
-app.use('/snippets', snippetsRouter);
+// Mock do SnippetService
+jest.mock('../services/snippet.service');
 
 describe('Snippets Routes', () => {
-  let mockSnippetService: jest.Mocked<SnippetService>;
+  const mockSnippetService = {
+    createSnippet: jest.fn(),
+    getSnippet: jest.fn(),
+    getAllSnippets: jest.fn(),
+  };
+
+  beforeAll(() => {
+    (SnippetService as jest.MockedClass<typeof SnippetService>).mockImplementation(
+      () => mockSnippetService as any
+    );
+  });
+
+  const app = express();
+  app.use(express.json());
+  app.use('/snippets', snippetsRouter);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSnippetService = {
-      createSnippet: jest.fn(),
-      getSnippet: jest.fn(),
-      getAllSnippets: jest.fn()
-    } as any;
-
-    MockedSnippetService.mockImplementation(() => mockSnippetService);
   });
 
   describe('POST /snippets', () => {
