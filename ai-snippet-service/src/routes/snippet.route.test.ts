@@ -1,24 +1,23 @@
 import request from 'supertest';
 import express from 'express';
-import { SnippetService } from '../services/snippet.service';
+
+// Mock SnippetService ANTES de importar as rotas
+const mockSnippetService = {
+  createSnippet: jest.fn(),
+  getSnippet: jest.fn(),
+  getAllSnippets: jest.fn(),
+};
+
+jest.mock('../services/snippet.service', () => {
+  return {
+    SnippetService: jest.fn().mockImplementation(() => mockSnippetService),
+  };
+});
+
+// Agora importamos as rotas DEPOIS do mock
 import { snippetsRouter } from './snippet.route';
 
-// Mock do SnippetService
-jest.mock('../services/snippet.service');
-
 describe('Snippets Routes', () => {
-  const mockSnippetService = {
-    createSnippet: jest.fn(),
-    getSnippet: jest.fn(),
-    getAllSnippets: jest.fn(),
-  };
-
-  beforeAll(() => {
-    (SnippetService as jest.MockedClass<typeof SnippetService>).mockImplementation(
-      () => mockSnippetService as any
-    );
-  });
-
   const app = express();
   app.use(express.json());
   app.use('/snippets', snippetsRouter);
