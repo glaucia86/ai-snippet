@@ -15,402 +15,109 @@
   <img src="https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white" />
 </p>
 
-<h1 align="center">🤖 AI Snippet Service</h1>
+# 🤖 AI Snippet Service
 
-<p align="center">
-  <strong>A full-stack TypeScript application that transforms text content into AI-powered summaries</strong>
-</p>
+**Transform any text into AI-powered summaries (≤30 words) using GPT-4o**
 
-<p align="center">
-  Built with Express.js backend, Remix frontend, and GitHub Models integration using GPT-4o for intelligent text summarization.
-</p>
+Full-stack TypeScript app with Express API + Remix frontend that creates intelligent text summaries.
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-- Node.js 20+
 - Docker & Docker Compose
-- GitHub Personal Access Token (for AI integration)
+- GitHub Personal Access Token
 
-### Option 1: Docker (Recommended)
-
+### 1. Setup
 ```bash
-# Clone the repository
 git clone <your-repo-url>
 cd ai-snippet-service
-
-# Copy environment template
 cp .env.example .env
-
-# Edit .env and add your GitHub Models token
-nano .env  # Add your GITHUB_MODELS_TOKEN
-
-# Run with Docker (includes tests)
-./scripts/docker-dev.sh
 ```
 
-### Option 2: Local Development (Recommended)
+### 2. Get GitHub Token
+1. Go to: https://github.com/settings/tokens
+2. Click **"Generate new token (classic)"**
+3. Name: `AI Snippet Test`
+4. No permissions needed - just generate
+5. Copy the token (starts with `ghp_`)
 
+### 3. Configure & Run
 ```bash
-# Install dependencies
-npm install
+# Add your token to .env
+echo 'GITHUB_MODELS_TOKEN="ghp_your_token_here"' >> .env
 
-# Start MongoDB (Docker)
-docker-compose up -d mongodb
+# Start application
+docker-compose up -d
 
-# Run tests
-npm test
-
-# Start development servers
-npm run dev
+# Check status
+docker-compose ps
 ```
 
-The application will be available at:
-- **Frontend**: http://localhost:3030
-- **API**: http://localhost:3001
-- **API Health Check**: http://localhost:3001/health
+---
 
-## 🏗️ Architecture
+## ✅ Test It
 
-```
-ai-snippet-service/
-├── src/                    # Backend (Express API)
-│   ├── routes/            # API endpoints
-│   ├── services/          # Business logic
-│   ├── models/            # MongoDB models
-│   └── tests/             # Test files
-├── app/                   # Frontend (Remix)
-│   ├── routes/            # Remix routes
-│   └── styles/            # Tailwind CSS
-├── docker/                # Docker configuration
-├── scripts/               # Automation scripts
-├── Dockerfile.api         # Backend container
-├── Dockerfile.ui          # Frontend container
-└── docker-compose.yml     # Orchestration
+**Web Interface:** http://localhost:3030
+- Paste any text → Get AI summary
+
+**API Health:** http://localhost:3001/health
+
+**Create Snippet via API:**
+```bash
+curl -X POST http://localhost:3001/snippets \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Your long text here..."}'
 ```
 
-## 🔑 API Key Setup
+---
 
-### GitHub Models Token
+## 🐛 Issues?
 
-1. Visit [GitHub Settings > Personal Access Tokens](https://github.com/settings/tokens)
-2. Click **"Generate new token"** → **"Fine-grained personal access token"**
-3. Configure the token:
-   - **Name**: "AI Snippet Service"
-   - **Expiration**: 90 days (or as needed)
-   - **Permissions**:
-     - Contents: Read
-     - Metadata: Read
-     - Pull requests: Read
-4. Copy the generated token (starts with `ghp_`)
-5. Add to your `.env` file:
-   ```bash
-   GITHUB_MODELS_TOKEN=ghp_your-actual-token-here
-   GITHUB_MODELS_ENDPOINT=https://models.inference.ai.azure.com
-   ```
+**Containers not running?**
+```bash
+docker-compose logs
+docker-compose restart
+```
+
+**"Cannot GET /" error?**
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+**Token error?**
+- Check your token starts with `ghp_`
+- Verify it's in `.env` file
+- Restart: `docker-compose restart`
+
+---
 
 ## 📡 API Endpoints
 
-### Create Snippet
-```bash
-POST /snippets
-Content-Type: application/json
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/health` | API status |
+| POST | `/snippets` | Create snippet |
+| GET | `/snippets` | List all snippets |
+| GET | `/snippets/:id` | Get specific snippet |
 
-{
-  "text": "Your content here..."
-}
+---
 
-# Response
-{
-  "id": "507f1f77bcf86cd799439011",
-  "text": "Your content here...",
-  "summary": "AI-generated summary (≤30 words)",
-  "createdAt": "2024-01-15T10:30:00Z",
-  "updatedAt": "2024-01-15T10:30:00Z"
-}
-```
+## 🏗️ Architecture
 
-### Get Snippet by ID
-```bash
-GET /snippets/:id
+- **Backend:** Node.js + Express + TypeScript
+- **Frontend:** Remix + React + Tailwind CSS  
+- **Database:** MongoDB (with in-memory fallback)
+- **AI:** GitHub Models (GPT-4o)
+- **Container:** Docker + Docker Compose
 
-# Response
-{
-  "id": "507f1f77bcf86cd799439011",
-  "text": "Your content here...",
-  "summary": "AI-generated summary",
-  "createdAt": "2024-01-15T10:30:00Z",
-  "updatedAt": "2024-01-15T10:30:00Z"
-}
-```
+---
 
-### Get All Snippets
-```bash
-GET /snippets
+## 📄 License
 
-# Response
-[
-  {
-    "id": "507f1f77bcf86cd799439011",
-    "text": "Content...",
-    "summary": "Summary...",
-    "createdAt": "2024-01-15T10:30:00Z",
-    "updatedAt": "2024-01-15T10:30:00Z"
-  }
-]
-```
-
-## 🧪 Testing
-
-### Run All Tests
-```bash
-npm test
-```
-
-### Run Tests with Coverage
-```bash
-npm run test:coverage
-```
-
-### Run Tests in Docker
-```bash
-./scripts/test.sh
-```
-
-## 📋 Request Examples
-
-### Using curl
-
-```bash
-# Health check
-curl http://localhost:3001/health
-
-# Create a snippet
-curl -X POST http://localhost:3001/snippets \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Artificial intelligence (AI) is intelligence demonstrated by machines, in contrast to the natural intelligence displayed by humans and animals. Leading AI textbooks define the field as the study of intelligent agents: any device that perceives its environment and takes actions that maximize its chance of successfully achieving its goals."
-  }'
-
-# Get all snippets
-curl http://localhost:3001/snippets
-
-# Get specific snippet (replace with actual ID)
-curl http://localhost:3001/snippets/507f1f77bcf86cd799439011
-```
-
-### Using Postman
-
-Import this collection into Postman:
-
-```json
-{
-  "info": {
-    "name": "AI Snippet Service",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:3001"
-    }
-  ],
-  "item": [
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": ["{{baseUrl}}"],
-          "path": ["health"]
-        }
-      }
-    },
-    {
-      "name": "Create Snippet",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"text\": \"Your long text content here that needs to be summarized by AI...\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/snippets",
-          "host": ["{{baseUrl}}"],
-          "path": ["snippets"]
-        }
-      }
-    },
-    {
-      "name": "Get All Snippets",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/snippets",
-          "host": ["{{baseUrl}}"],
-          "path": ["snippets"]
-        }
-      }
-    },
-    {
-      "name": "Get Snippet by ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/snippets/{{snippetId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["snippets", "{{snippetId}}"]
-        }
-      }
-    }
-  ]
-}
-```
-
-## 🐳 Docker Commands
-
-### Development
-```bash
-# Start all services
-docker-compose up
-
-# Start in background
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-### Production Build
-```bash
-# Build optimized images
-./scripts/build.sh
-
-# Or manually
-docker-compose build --no-cache
-```
-
-## 🛠️ Development Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Run development servers (API + UI)
-npm run dev
-
-# Run only API server
-npm run dev:api
-
-# Run only UI server
-npm run dev:ui
-
-# Build for production
-npm run build
-
-# Type checking
-npm run type-check
-
-# Run linter
-npm run lint
-```
-
-## 🎯 Features
-
-### Backend (Express + TypeScript)
-- ✅ RESTful API with proper HTTP status codes
-- ✅ MongoDB integration with Mongoose
-- ✅ GitHub Models integration with GPT-4o
-- ✅ Automatic retry logic for AI API calls
-- ✅ Input validation and error handling
-- ✅ Comprehensive test suite with Jest + Supertest
-- ✅ Docker containerization
-- ✅ Health check endpoint
-- ✅ Request logging with Morgan
-- ✅ Security headers with Helmet
-- ✅ CORS configuration
-- ✅ In-memory fallback when database unavailable
-
-### Frontend (Remix + Tailwind CSS)
-- ✅ Server-side rendering with Remix
-- ✅ Responsive design with Tailwind CSS
-- ✅ Form handling with loading states
-- ✅ Error boundaries and proper error handling
-- ✅ Copy to clipboard functionality
-- ✅ Character/word counting
-- ✅ Mobile-friendly interface
-- ✅ Accessibility considerations
-- ✅ Mock data fallback for development
-
-### DevOps & Infrastructure
-- ✅ Multi-stage Docker builds
-- ✅ Docker Compose orchestration
-- ✅ Health checks for all services
-- ✅ Automated testing pipeline
-- ✅ Environment variable management
-- ✅ Database initialization scripts
-- ✅ Production-ready configurations
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-**MongoDB Connection Error**
-```bash
-# Check if MongoDB is running
-docker-compose ps mongodb
-
-# View logs
-docker-compose logs mongodb
-
-# Restart MongoDB  
-docker-compose restart mongodb
-```
-
-**GitHub Models API Error**
-```bash
-# Check your token in .env
-grep GITHUB_MODELS_TOKEN .env
-
-# Verify token format (should start with 'ghp_')
-# Check token permissions at https://github.com/settings/tokens
-```
-
-**Port Already in Use**
-```bash
-# Check what's using the port
-lsof -i :3001
-lsof -i :3030
-
-# Stop conflicting processes or change ports in .env
-```
-
-## 📊 Technical Stack
-
-- **Backend**: Node.js, Express.js, TypeScript
-- **Frontend**: Remix, React, Tailwind CSS  
-- **Database**: MongoDB with Mongoose
-- **AI Service**: GitHub Models (GPT-4o)
-- **Testing**: Jest, Supertest
-- **Containerization**: Docker, Docker Compose
-- **Development**: Nodemon, Concurrently
-- **Code Quality**: ESLint, TypeScript
+MIT License
 
 ---
 
@@ -486,22 +193,4 @@ The 3-hour time constraint required focusing on core functionality while maintai
 
 ---
 
-## 📄 License
-
-MIT License - See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Write tests for your changes
-4. Ensure all tests pass (`npm test`)
-5. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-6. Push to the branch (`git push origin feature/AmazingFeature`)
-7. Open a Pull Request
-
----
-
-**Repository URL**: `https://github.com/glaucia86/ai-snippet`
-
-Made with ❤️ using modern TypeScript and AI-powered development practices.
+**Repository:** https://github.com/glaucia86/ai-snippet
