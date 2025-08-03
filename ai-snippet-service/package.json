@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
     "dev:api": "nodemon --exec ts-node src/server.ts",
+    "dev:test-api": "nodemon --exec ts-node test-server.ts",
+    "dev:simple-api": "node simple-server.js",
     "dev:ui": "remix dev --port 3030",
     "build": "npm run build:api && npm run build:ui",
     "build:api": "tsc",
