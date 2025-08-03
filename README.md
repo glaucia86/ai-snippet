@@ -19,105 +19,233 @@
 
 **Transform any text into AI-powered summaries (≤30 words) using GPT-4o**
 
-Full-stack TypeScript app with Express API + Remix frontend that creates intelligent text summaries.
+Full-stack TypeScript application with Express API + Remix frontend that creates intelligent text summaries.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Setup Instructions
 
 ### Prerequisites
+- Node.js 20+
 - Docker & Docker Compose
-- GitHub Personal Access Token
+- GitHub Personal Access Token (for AI integration)
 
-### 1. Setup
-```bash
-git clone <your-repo-url>
-cd ai-snippet-service
-cp .env.example .env
-```
+### Required API Keys
 
-### 2. Get GitHub Token
-1. Go to: https://github.com/settings/tokens
-2. Click **"Generate new token (classic)"**
-3. Name: `AI Snippet Test`
-4. No permissions needed - just generate
+**GitHub Models Token (Required for AI functionality):**
+
+1. Visit: https://github.com/settings/tokens
+2. Click **"Generate new token"** → **"Generate new token (classic)"**  
+3. Configure:
+   - **Name**: `AI Snippet Service`
+   - **Expiration**: 90 days (or as needed)
+   - **Scopes**: No permissions needed for GitHub Models
+4. Click **"Generate token"**
 5. Copy the token (starts with `ghp_`)
 
-### 3. Configure & Run
+### Setup Options
+
+#### Option 1: Docker (Recommended)
+
 ```bash
-# Add your token to .env
+# Clone repository
+git clone <your-repo-url>
+cd ai-snippet-service
+
+# Configure environment
+cp .env.example .env
 echo 'GITHUB_MODELS_TOKEN="ghp_your_token_here"' >> .env
 
 # Start application
 docker-compose up -d
 
-# Check status
+# Verify running services
 docker-compose ps
 ```
 
+#### Option 2: Local Development
+
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd ai-snippet-service
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your GITHUB_MODELS_TOKEN
+
+# Start MongoDB (Docker)
+docker-compose up -d mongodb
+
+# Start development servers
+npm run dev
+```
+
 ---
 
-## ✅ Test It
+## 🧪 Running Tests
 
-**Web Interface:** http://localhost:3030
-- Paste any text → Get AI summary
+```bash
+# Run all tests
+npm test
 
-**API Health:** http://localhost:3001/health
+# Run tests with coverage
+npm run test:coverage
 
-**Create Snippet via API:**
+# Run tests in Docker
+docker-compose run --rm test
+
+# Run tests with watch mode (local development)
+npm run test:watch
+```
+
+---
+
+## 📡 API Endpoints & Examples
+
+**Base URL:** `http://localhost:3001`
+
+### Health Check
+```bash
+curl http://localhost:3001/health
+```
+
+### Create Snippet
 ```bash
 curl -X POST http://localhost:3001/snippets \
   -H "Content-Type: application/json" \
-  -d '{"text": "Your long text here..."}'
+  -d '{
+    "text": "Artificial intelligence (AI) is intelligence demonstrated by machines, in contrast to the natural intelligence displayed by humans and animals. Leading AI textbooks define the field as the study of intelligent agents: any device that perceives its environment and takes actions that maximize its chance of successfully achieving its goals."
+  }'
+```
+
+### Get All Snippets
+```bash
+curl http://localhost:3001/snippets
+```
+
+### Get Specific Snippet
+```bash
+curl http://localhost:3001/snippets/{snippet-id}
+```
+
+### Postman Collection
+
+Import this JSON into Postman for easy testing:
+
+```json
+{
+  "info": {
+    "name": "AI Snippet Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health"
+        }
+      }
+    },
+    {
+      "name": "Create Snippet",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Your long text content here that needs to be summarized by AI...\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/snippets"
+        }
+      }
+    },
+    {
+      "name": "Get All Snippets",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/snippets"
+        }
+      }
+    },
+    {
+      "name": "Get Snippet by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/snippets/{{snippetId}}"
+        }
+      }
+    }
+  ]
+}
 ```
 
 ---
 
-## 🐛 Issues?
+## 🎯 Testing the Application
 
-**Containers not running?**
+### Web Interface
+- **URL:** http://localhost:3030
+- Paste text → Generate AI summary → View saved snippets
+
+### API Testing
+- **Health:** http://localhost:3001/health
+- Use curl commands above or import Postman collection
+
+---
+
+## 🏗️ Project Structure
+
+```
+ai-snippet-service/
+├── src/                    # Express backend
+│   ├── routes/            # API endpoints
+│   ├── services/          # Business logic (AI, snippets)
+│   ├── models/            # MongoDB schemas
+│   └── tests/             # Test files
+├── app/                   # Remix frontend
+├── docker/                # Database initialization
+├── Dockerfile.api         # Backend container
+├── Dockerfile.ui          # Frontend container
+└── docker-compose.yml     # Orchestration
+```
+
+---
+
+## 🔧 Troubleshooting
+
+**Containers not starting:**
 ```bash
 docker-compose logs
-docker-compose restart
+docker-compose down && docker-compose up -d
 ```
 
-**"Cannot GET /" error?**
-```bash
-docker-compose down
-docker-compose up -d
-```
-
-**Token error?**
-- Check your token starts with `ghp_`
-- Verify it's in `.env` file
-- Restart: `docker-compose restart`
-
----
-
-## 📡 API Endpoints
-
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/health` | API status |
-| POST | `/snippets` | Create snippet |
-| GET | `/snippets` | List all snippets |
-| GET | `/snippets/:id` | Get specific snippet |
-
----
-
-## 🏗️ Architecture
-
-- **Backend:** Node.js + Express + TypeScript
-- **Frontend:** Remix + React + Tailwind CSS  
-- **Database:** MongoDB (with in-memory fallback)
-- **AI:** GitHub Models (GPT-4o)
-- **Container:** Docker + Docker Compose
-
----
-
-## 📄 License
-
-MIT License
+**API errors:**
+- Verify `GITHUB_MODELS_TOKEN` in `.env`
+- Check token starts with `ghp_`
+- Restart: `docker-compose restart api`
 
 ---
 
@@ -125,72 +253,32 @@ MIT License
 
 ### What I'd improve with more time:
 
-**1. Enhanced AI Features**
-- Support for multiple AI providers with automatic failover
-- Configurable summary length and different summary styles
-- Streaming AI responses with Server-Sent Events for better UX
-- Cost optimization and rate limiting per user
+**Enhanced AI Features:** Multiple AI provider support with automatic failover, configurable summary lengths, streaming responses with Server-Sent Events, and per-user rate limiting for cost optimization.
 
-**2. Advanced Authentication & Security**
-- JWT-based authentication system
-- Role-based access control for snippets
-- User-specific snippet ownership and privacy controls
-- API rate limiting and request validation
+**Security & Authentication:** JWT-based authentication, role-based access control, user-specific snippet ownership, comprehensive input validation, and API rate limiting.
 
-**3. Performance & Scalability**
-- Redis caching layer for frequently accessed snippets
-- Database connection pooling and query optimization
-- CDN integration for static assets
-- Background job processing for AI requests using queues
+**Performance & Scalability:** Redis caching for frequently accessed snippets, database connection pooling, CDN integration, background job processing with queues, and horizontal scaling capabilities.
 
-**4. Production Readiness**
-- CI/CD pipeline with GitHub Actions
-- Comprehensive monitoring with health checks and metrics
-- Automated backup strategies for data persistence
-- Log aggregation and error tracking
-- Load balancing and horizontal scaling capabilities
-
-**5. User Experience Enhancements**
-- Rich text editor with syntax highlighting
-- Snippet categories, tags, and search functionality
-- Export functionality (PDF, Word, Markdown)
-- Real-time collaboration features
-- Progressive Web App (PWA) capabilities
+**Production Readiness:** CI/CD pipeline with GitHub Actions, comprehensive monitoring and health checks, automated backup strategies, log aggregation, error tracking, and load balancing setup.
 
 ### Trade-offs made:
 
-**1. Database Flexibility vs Consistency**
-- **Choice**: MongoDB for rapid development and schema flexibility
-- **Trade-off**: Sacrificed ACID transactions for faster prototyping
-- **Alternative**: PostgreSQL with Prisma would provide better type safety and relations
+**Database Choice:** Selected MongoDB for rapid development and schema flexibility, sacrificing ACID transactions for faster prototyping. PostgreSQL with Prisma would provide better type safety and relational capabilities.
 
-**2. In-Memory Fallback vs Pure Database Design**
-- **Choice**: Implemented in-memory storage when database unavailable
-- **Trade-off**: Added complexity but improved development experience
-- **Impact**: Allows development without database setup, but creates dual code paths
+**Fallback Strategy:** Implemented in-memory storage when database unavailable, adding complexity but improving development experience. This creates dual code paths but enables development without database setup.
 
-**3. AI Provider Lock-in vs Multi-Provider Architecture**
-- **Choice**: Focused on GitHub Models for simplicity and performance
-- **Trade-off**: Easy integration but creates vendor dependency
-- **Alternative**: Abstract AI service interface supporting multiple providers
+**AI Integration:** Focused on GitHub Models for simplicity, creating vendor dependency but enabling quick implementation. A provider-agnostic interface would offer more flexibility.
 
-**4. Monolithic vs Microservices Architecture**
-- **Choice**: Single Docker Compose setup with coupled services
-- **Trade-off**: Simpler deployment but less scalable architecture
-- **Alternative**: Separate services with proper API gateways for production
+**Architecture:** Chose monolithic Docker Compose setup over microservices for simpler deployment, suitable for MVP but less scalable for production.
 
-**5. Client-Side State vs Advanced State Management**
-- **Choice**: Used Remix's built-in state management
-- **Trade-off**: Simpler implementation but limited offline capabilities
-- **Alternative**: Redux Toolkit or Zustand for complex client state
+**State Management:** Used Remix's built-in patterns over complex state management solutions, prioritizing simplicity over advanced offline capabilities.
 
-**6. Development Speed vs Production Optimization**
-- **Choice**: Prioritized working features over micro-optimizations
-- **Trade-off**: Fast development cycle but some performance considerations deferred
-- **Impact**: Suitable for MVP but would need optimization for scale
-
-The 3-hour time constraint required focusing on core functionality while maintaining code quality. The Test-Driven Development approach proved valuable for ensuring reliability, while the containerized setup provides a solid foundation for production deployment. The application successfully demonstrates all required features with room for enhancement in scalability and advanced features.
+The 3-hour constraint required focusing on core functionality while maintaining code quality. The Test-Driven Development approach ensured reliability, while the containerized setup provides a solid foundation for production deployment.
 
 ---
+
+## 📄 License
+
+MIT License
 
 **Repository:** https://github.com/glaucia86/ai-snippet
