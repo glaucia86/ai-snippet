@@ -10,6 +10,10 @@ export interface SnippetDTO {
   updatedAt?: Date;
 }
 
+// In-memory storage for when database is not available
+const inMemorySnippets: Map<string, SnippetDTO> = new Map();
+let nextId = 1;
+
 export class SnippetService {
   private aiService: AIService;
 
@@ -25,14 +29,29 @@ export class SnippetService {
     try {
       const summary = await this.aiService.generateSummary(text.trim());
 
-      const snippet = new Snippet({
-        text: text.trim(),
-        summary,
-      });
+      // Try to use database if available
+      if (mongoose.connection.readyState === 1) {
+        const snippet = new Snippet({
+          text: text.trim(),
+          summary,
+        });
 
-      const savedSnippet = await snippet.save();
-
-      return this.toDTO(savedSnippet as ISnippet & { _id: mongoose.Types.ObjectId });
+        const savedSnippet = await snippet.save();
+        return this.toDTO(savedSnippet as ISnippet & { _id: mongoose.Types.ObjectId });
+      } else {
+        // Use in-memory storage
+        const id = (nextId++).toString();
+        const snippet: SnippetDTO = {
+          id,
+          text: text.trim(),
+          summary,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        inMemorySnippets.set(id, snippet);
+        return snippet;
+      }
     } catch (error) {
       throw new Error('Failed to create snippet');
     }
@@ -40,17 +59,23 @@ export class SnippetService {
 
   async getSnippet(id: string): Promise<SnippetDTO | null> {
     try {
-      if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new Error('Invalid snippet ID');
-      }
+      // Try database first
+      if (mongoose.connection.readyState === 1) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+          throw new Error('Invalid snippet ID');
+        }
 
-      const snippet = await Snippet.findById(id);
-      
-      if (!snippet) {
-        return null;
-      }
+        const snippet = await Snippet.findById(id);
+        
+        if (!snippet) {
+          return null;
+        }
 
-      return this.toDTO(snippet as ISnippet & { _id: mongoose.Types.ObjectId });
+        return this.toDTO(snippet as ISnippet & { _id: mongoose.Types.ObjectId });
+      } else {
+        // Use in-memory storage
+        return inMemorySnippets.get(id) || null;
+      }
     } catch (error) {
       throw new Error('Failed to retrieve snippet');
     }
@@ -58,11 +83,18 @@ export class SnippetService {
 
   async getAllSnippets(): Promise<SnippetDTO[]> {
     try {
-      const snippets = await Snippet.find()
-        .sort({ createdAt: -1 })
-        .exec();
+      // Try database first
+      if (mongoose.connection.readyState === 1) {
+        const snippets = await Snippet.find()
+          .sort({ createdAt: -1 })
+          .exec();
 
-      return snippets.map(snippet => this.toDTO(snippet as ISnippet & { _id: mongoose.Types.ObjectId }));
+        return snippets.map(snippet => this.toDTO(snippet as ISnippet & { _id: mongoose.Types.ObjectId }));
+      } else {
+        // Use in-memory storage
+        return Array.from(inMemorySnippets.values())
+          .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+      }
     } catch (error) {
       throw new Error('Failed to retrieve snippets');
     }
