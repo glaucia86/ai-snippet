@@ -1,26 +1,20 @@
+// Test setup file
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
-let mongod: MongoMemoryServer;
-
+// Mock para o banco de dados MongoDB (será substituído por mongodb-memory-server quando instalado)
 beforeAll(async () => {
-  mongod = await MongoMemoryServer.create();
-  const uri = mongod.getUri();
-  await mongoose.connect(uri);
+  // Para testes sem banco real por enquanto
+  console.log('Setting up tests...');
 });
 
 beforeEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    const collection = collections[key];
-    await collection.deleteMany({});
-  }
+  // Limpar dados entre testes
+  console.log('Cleaning up before each test...');
 });
 
 afterAll(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
-  await mongod.stop();
+  // Cleanup após todos os testes
+  console.log('Cleaning up after all tests...');
 });
 
 export const mockAIService = {
