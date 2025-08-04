@@ -49,26 +49,35 @@ Full-stack TypeScript application with Express API + Remix frontend that creates
 
 ```bash
 # Clone repository
-git clone <your-repo-url>
-cd ai-snippet-service
+git clone https://github.com/glaucia86/ai-snippet.git
+cd ai-snippet/ai-snippet-service
 
 # Configure environment
 cp .env.example .env
-echo 'GITHUB_MODELS_TOKEN="ghp_your_token_here"' >> .env
+# Edit .env and add your GitHub Models token:
+# GITHUB_MODELS_TOKEN="ghp_your_token_here"
 
-# Start application
+# Start all services (API, UI, MongoDB)
 docker-compose up -d
 
-# Verify running services
+# Verify services are running
 docker-compose ps
+
+# View logs if needed
+docker-compose logs api ui --follow
 ```
+
+**Service URLs after startup:**
+- **Web Interface:** http://localhost:3030
+- **API Backend:** http://localhost:3001  
+- **Health Check:** http://localhost:3001/health
 
 #### Option 2: Local Development
 
 ```bash
 # Clone repository
-git clone <your-repo-url>
-cd ai-snippet-service
+git clone https://github.com/glaucia86/ai-snippet.git
+cd ai-snippet/ai-snippet-service
 
 # Install dependencies
 npm install
@@ -83,6 +92,10 @@ docker-compose up -d mongodb
 # Start development servers
 npm run dev
 ```
+
+**Service URLs in development:**
+- **Web Interface:** http://localhost:3030
+- **API Backend:** http://localhost:3001
 
 ---
 
@@ -206,13 +219,56 @@ Import this JSON into Postman for easy testing:
 
 ## 🎯 Testing the Application
 
-### Web Interface
-- **URL:** http://localhost:3030
-- Paste text → Generate AI summary → View saved snippets
+### Step-by-Step Testing Guide
 
-### API Testing
-- **Health:** http://localhost:3001/health
-- Use curl commands above or import Postman collection
+**1. Verify Services are Running:**
+```bash
+# Check all containers are healthy
+docker-compose ps
+
+# Test API health
+curl http://localhost:3001/health
+# Expected: {"status":"ok","timestamp":"...","environment":"production"}
+
+# Test web interface
+curl -I http://localhost:3030
+# Expected: HTTP/1.1 200 OK
+```
+
+**2. Test Web Interface:**
+- **URL:** http://localhost:3030
+- Paste a long text in the textarea
+- Click **"Generate Summary"** button
+- Should redirect to `/snippets` with the new summary
+- Click **"View All"** to see all created snippets
+- Click **"View Details"** on any snippet for full view
+
+**3. Test API Directly:**
+```bash
+# Create a snippet
+curl -X POST http://localhost:3001/snippets \
+  -H "Content-Type: application/json" \
+  -d '{"text": "This is a test text that will be summarized by AI to demonstrate the functionality of our snippet service."}'
+
+# Get all snippets
+curl http://localhost:3001/snippets
+
+# Get specific snippet (replace ID with actual ID from previous response)
+curl http://localhost:3001/snippets/YOUR_SNIPPET_ID
+```
+
+**4. PowerShell Testing (Windows):**
+```powershell
+# Test API health
+Invoke-RestMethod -Uri "http://localhost:3001/health"
+
+# Create snippet
+$body = @{text = "Your test text here..."} | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:3001/snippets" -Method POST -Body $body -ContentType "application/json"
+
+# Get all snippets
+Invoke-RestMethod -Uri "http://localhost:3001/snippets"
+```
 
 ---
 
@@ -226,26 +282,86 @@ ai-snippet-service/
 │   ├── models/            # MongoDB schemas
 │   └── tests/             # Test files
 ├── app/                   # Remix frontend
+│   ├── routes/            # Remix routes (pages)
+│   ├── components/        # React components
+│   └── styles/            # Tailwind CSS
 ├── docker/                # Database initialization
 ├── Dockerfile.api         # Backend container
 ├── Dockerfile.ui          # Frontend container
-└── docker-compose.yml     # Orchestration
+├── docker-compose.yml     # Orchestration
+├── package.json           # Dependencies & scripts
+└── .env.example           # Environment template
 ```
+
+### Docker Architecture
+
+The application runs in **3 containers**:
+
+1. **`ai-snippets-api`** (Port 3001)
+   - Express.js backend with TypeScript
+   - Handles AI processing via GitHub Models
+   - MongoDB integration for data persistence
+   - RESTful API endpoints
+
+2. **`ai-snippets-ui`** (Port 3030)  
+   - Remix frontend with Tailwind CSS
+   - Server-side rendering for better performance
+   - Responsive interface for snippet management
+
+3. **`ai-snippets-db`** (Port 27017)
+   - MongoDB database
+   - Initialized with proper collections
+   - Data persistence and indexing
+
+**Container Communication:**
+- UI → API: `http://api:3001` (internal Docker network)
+- API → MongoDB: `mongodb://mongodb:27017/ai-snippets`
+- External access: `localhost:3030` (UI), `localhost:3001` (API)
 
 ---
 
 ## 🔧 Troubleshooting
 
+### Common Issues
+
 **Containers not starting:**
 ```bash
-docker-compose logs
+# Check container status
+docker-compose ps
+
+# View detailed logs
+docker-compose logs api ui mongodb
+
+# Restart all services
 docker-compose down && docker-compose up -d
 ```
 
-**API errors:**
-- Verify `GITHUB_MODELS_TOKEN` in `.env`
-- Check token starts with `ghp_`
-- Restart: `docker-compose restart api`
+**Port conflicts:**
+- If ports 3030, 3001, or 27017 are already in use, modify `docker-compose.yml`
+- Example: Change `"3030:3030"` to `"3031:3030"` for UI port
+
+**API errors (500/404):**
+- Verify `GITHUB_MODELS_TOKEN` is set in `.env`
+- Check token starts with `ghp_` and is valid
+- Restart API: `docker-compose restart api`
+
+**Web interface showing errors:**
+- Check if API is accessible: `curl http://localhost:3001/health`
+- Verify all containers are healthy: `docker-compose ps`
+- Check browser console for JavaScript errors
+
+**Database connection issues:**
+```bash
+# Check MongoDB container
+docker-compose logs mongodb
+
+# Restart database
+docker-compose restart mongodb
+```
+
+**Performance issues:**
+- Ensure Docker has enough resources (4GB+ RAM recommended)
+- Check system resources: `docker stats`
 
 ---
 
