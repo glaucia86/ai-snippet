@@ -1,5 +1,5 @@
 import type { LoaderFunction, MetaFunction } from "@remix-run/node";
-import { data } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData, Link, useRouteError } from "@remix-run/react";
 import { useState } from "react";
 
@@ -13,10 +13,6 @@ interface Snippet {
 interface LoaderData {
   snippet: Snippet;
 }
-
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.API_BASE_URL || 'http://localhost:3001'
-  : 'http://localhost:3001';
 
 // Mock data for demonstration when API is not available
 const mockSnippets = [
@@ -35,6 +31,10 @@ const mockSnippets = [
 ];
 
 export const loader: LoaderFunction = async ({ params }) => {
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? process.env.API_BASE_URL || 'http://localhost:3001'
+    : 'http://localhost:3001';
+
   const { id } = params;
 
   if (!id) {

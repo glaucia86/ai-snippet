@@ -1,7 +1,7 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { redirect, data } from "@remix-run/node";
+import { redirect, json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useNavigation, Link } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Types
 interface Snippet {
@@ -19,10 +19,6 @@ interface ActionData {
 interface LoaderData {
   recentSnippets: Snippet[];
 }
-
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.API_BASE_URL || 'http://localhost:3001'
-  : 'http://localhost:3001';
 
 // Mock data for when API is unavailable
 const mockSnippets: Snippet[] = [
@@ -42,6 +38,10 @@ const mockSnippets: Snippet[] = [
 
 // Loader to fetch recent snippets
 export const loader: LoaderFunction = async () => {
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? process.env.API_BASE_URL || 'http://localhost:3001'
+    : 'http://localhost:3001';
+
   try {
     const response = await fetch(`${API_BASE_URL}/snippets`);
     
@@ -65,11 +65,15 @@ export const loader: LoaderFunction = async () => {
 
 // Action to create new snippet
 export const action: ActionFunction = async ({ request }) => {
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? process.env.API_BASE_URL || 'http://localhost:3001'
+    : 'http://localhost:3001';
+
   const formData = await request.formData();
   const text = formData.get("text")?.toString();
 
   if (!text || text.trim().length === 0) {
-    return data({ 
+    return json({ 
       error: "Text is required and cannot be empty" 
     }, { status: 400 });
   }
@@ -116,6 +120,11 @@ export default function Index() {
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
   const [text, setText] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const isSubmitting = navigation.state === "submitting";
 
@@ -163,7 +172,7 @@ export default function Index() {
                 />
               </div>
               <div className="mt-2 flex justify-between text-sm text-gray-500">
-                <span>{text.length} characters</span>
+                <span>{isClient ? `${text.length} characters` : '0 characters'}</span>
                 <span>Max: 10,000 characters</span>
               </div>
             </div>
@@ -195,7 +204,7 @@ export default function Index() {
               <button
                 type="submit"
                 className="btn-primary"
-                disabled={isSubmitting || text.trim().length === 0}
+                disabled={isSubmitting || !isClient || text.trim().length === 0}
               >
                 {isSubmitting ? (
                   <>
@@ -240,7 +249,7 @@ export default function Index() {
                         }
                       </p>
                       <p className="text-xs text-gray-400 mt-2">
-                        Created {new Date(snippet.createdAt).toLocaleDateString()}
+                        Created {isClient ? new Date(snippet.createdAt).toLocaleDateString() : 'recently'}
                       </p>
                     </div>
                     <Link 

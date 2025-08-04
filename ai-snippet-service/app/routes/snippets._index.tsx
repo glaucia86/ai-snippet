@@ -12,16 +12,16 @@ interface LoaderData {
   snippets: Snippet[];
 }
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.API_BASE_URL || 'http://localhost:3001'
-  : 'http://localhost:3001';
-
 export const meta: MetaFunction = () => [
   { title: "All Snippets | AI Snippet Service" },
   { name: "description", content: "Browse all your AI-generated snippet summaries" },
 ];
 
 export const loader: LoaderFunction = async () => {
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? process.env.API_BASE_URL || 'http://localhost:3001'
+    : 'http://localhost:3001';
+
   try {
     const response = await fetch(`${API_BASE_URL}/snippets`);
     
