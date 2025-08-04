@@ -60,10 +60,10 @@ services:
     container_name: ai-snippets-ui
     restart: unless-stopped
     ports:
-      - "3030:3000"
+      - "3030:3030"
     environment:
       NODE_ENV: production
-      UI_PORT: 3000
+      UI_PORT: 3030
       API_BASE_URL: http://api:3001
     depends_on:
       api:
