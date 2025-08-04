@@ -30,7 +30,6 @@ Thumbs.db
 docker-compose.yml
 docker-compose.*.yml
 Dockerfile*
-.dockerignore
 
 # Documentation
 README.md
@@ -43,12 +42,6 @@ scripts/
 logs
 *.log
 
-# Test files (for production builds - commented out for test builds)
-# **/*.test.ts
-# **/*.test.js
-# **/__tests__
-# **/tests
-
 # Temporary files
 tmp/
 temp/
@@ -59,3 +52,5 @@ temp/
 # Build artifacts
 *.tgz
 *.tar.gz
+
+# NOTE: Test files are included for test builds

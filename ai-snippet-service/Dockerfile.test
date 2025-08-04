@@ -1,0 +1,37 @@
+# Test Dockerfile - Keeps dev dependencies for testing
+FROM node:20-alpine
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for testing)
+RUN npm ci
+
+# Copy source code and config files (including test files)
+COPY src/ ./src/
+COPY tsconfig.json ./
+COPY jest.config.js ./
+
+# Explicitly copy test files to ensure they're included
+COPY src/**/*.test.ts ./src/
+
+# List files to debug
+RUN find src -name "*.test.ts" | head -10
+
+# Skip build for tests - Jest will compile on-the-fly
+# RUN npm run build:api
+
+# Don't prune dev dependencies - we need them for testing!
+
+# Expose port (not really needed for tests, but keeps consistency)
+EXPOSE 3001
+
+# Default command for tests
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["npx", "jest"]

@@ -81,8 +81,7 @@ services:
   test:
     build:
       context: .
-      dockerfile: Dockerfile.api
-      target: base
+      dockerfile: Dockerfile.test
     container_name: ai-snippets-test
     environment:
       NODE_ENV: test
@@ -97,7 +96,7 @@ services:
         condition: service_healthy
     networks:
       - ai-snippets-network
-    command: ["npm", "test"]
+    command: ["npx", "jest"]
     profiles: ["test"]
 
 networks:

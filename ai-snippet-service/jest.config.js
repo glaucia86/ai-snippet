@@ -20,9 +20,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/build/',
-    '/dist/',
-    'src/tests/models/snippet.test.ts', // Temporariamente ignorado
-    'src/services/snippet.service.test.ts' // Temporariamente ignorado
+    '/dist/'
   ],
   coverageDirectory: 'coverage',
   verbose: true,

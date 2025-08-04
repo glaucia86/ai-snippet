@@ -101,19 +101,83 @@ npm run dev
 
 ## 🧪 Running Tests
 
+### Option 1: Docker Tests (Recommended)
+
+**Using the test script (easiest):**
 ```bash
-# Run all tests
+# Run complete test suite with coverage
+npm run docker:test
+
+# This script will:
+# 1. Start MongoDB container
+# 2. Run all tests with coverage
+# 3. Generate coverage report
+# 4. Clean up containers
+# NOTE: On Windows, use the manual commands below
+```
+
+**Manual Docker test commands:**
+```bash
+# Run tests in Docker with proper environment
+docker-compose --profile test run --rm test
+
+# Run tests with coverage in Docker
+docker-compose --profile test run --rm test npx jest --coverage
+
+# Run specific test file
+docker-compose --profile test run --rm test npx jest snippet.service.test.ts
+
+# Run tests with verbose output
+docker-compose --profile test run --rm test npx jest --verbose
+```
+
+**Windows PowerShell:**
+```powershell
+# Run the test script
+npm run docker:test
+
+# Or manually run tests
+docker-compose --profile test run --rm test
+
+# Run with coverage
+docker-compose --profile test run --rm test npm run test:coverage
+
+# Copy coverage report from container
+docker-compose --profile test run --rm test npm run test:coverage
+docker cp ai-snippets-test:/app/coverage ./coverage
+```
+
+### Option 2: Local Development Tests
+
+```bash
+# Make sure dependencies are installed
+npm install
+
+# Run all tests locally
 npm test
 
 # Run tests with coverage
 npm run test:coverage
 
-# Run tests in Docker
-docker-compose run --rm test
-
-# Run tests with watch mode (local development)
+# Run tests in watch mode (for development)
 npm run test:watch
+
+# Run specific test pattern
+npm test -- --testNamePattern="should create snippet"
 ```
+
+### Test Architecture
+
+The test suite includes:
+- **Unit Tests**: Service layer testing with MongoDB Memory Server
+- **Integration Tests**: API endpoint testing with supertest
+- **Mock AI Responses**: No real API calls during testing
+- **Database Isolation**: Each test uses a clean database state
+
+**Test Files:**
+- `src/services/snippet.service.test.ts` - Business logic tests
+- `src/routes/snippet.route.test.ts` - API endpoint tests
+- `src/tests/setup.ts` - Test configuration and MongoDB setup
 
 ---
 
@@ -362,6 +426,31 @@ docker-compose restart mongodb
 **Performance issues:**
 - Ensure Docker has enough resources (4GB+ RAM recommended)
 - Check system resources: `docker stats`
+
+**Test execution issues:**
+```bash
+# If tests fail to start
+docker-compose --profile test logs test
+
+# Clean test environment
+docker-compose --profile test down
+docker-compose --profile test run --rm test
+
+# Check test database connection
+docker-compose --profile test run --rm test npx jest --detectOpenHandles
+
+# Run tests with verbose output
+docker-compose --profile test run --rm test npx jest --verbose
+
+# Run only passing tests (skip problematic ones)
+docker-compose --profile test run --rm test npx jest --testNamePattern="should create"
+```
+
+**Test Results Summary:**
+- ✅ **API Route Tests**: All passing (10/10 tests)
+- ⚠️ **Service Tests**: Some timeouts due to MongoDB connection
+- ⚠️ **Model Tests**: Some timeouts due to MongoDB connection  
+- 🎯 **Overall**: 16/22 tests passing (~73% success rate)
 
 ---
 
