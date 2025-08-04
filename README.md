@@ -69,7 +69,7 @@ docker-compose logs api ui --follow
 
 **Service URLs after startup:**
 - **Web Interface:** http://localhost:3030
-- **API Backend:** http://localhost:3001  
+- **API Backend:** http://localhost:3001/snippets  
 - **Health Check:** http://localhost:3001/health
 
 #### Option 2: Local Development
