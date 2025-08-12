@@ -6,7 +6,6 @@
   <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
   <img src="https://img.shields.io/badge/Tailwind%20CSS-38b2ac?style=for-the-badge&logo=tailwind-css&logoColor=white" />
 </p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
   <img src="https://img.shields.io/badge/GitHub%20Models-181717?style=for-the-badge&logo=github&logoColor=white" />
@@ -20,6 +19,10 @@
 **Transform any text into AI-powered summaries (≤30 words) using GPT-4o**
 
 Full-stack TypeScript application with Express API + Remix frontend that creates intelligent text summaries.
+
+<div align="center">
+  <img src="./resources/ai-snippet-v1.gif" />
+</div>
 
 ---
 
@@ -96,8 +99,6 @@ npm run dev
 **Service URLs in development:**
 - **Web Interface:** http://localhost:3030
 - **API Backend:** http://localhost:3001
-
----
 
 ## 🧪 Running Tests
 
@@ -178,8 +179,6 @@ The test suite includes:
 - `src/services/snippet.service.test.ts` - Business logic tests
 - `src/routes/snippet.route.test.ts` - API endpoint tests
 - `src/tests/setup.ts` - Test configuration and MongoDB setup
-
----
 
 ## 📡 API Endpoints & Examples
 
@@ -279,8 +278,6 @@ Import this JSON into Postman for easy testing:
 }
 ```
 
----
-
 ## 🎯 Testing the Application
 
 ### Step-by-Step Testing Guide
@@ -334,8 +331,6 @@ Invoke-RestMethod -Uri "http://localhost:3001/snippets" -Method POST -Body $body
 Invoke-RestMethod -Uri "http://localhost:3001/snippets"
 ```
 
----
-
 ## 🏗️ Project Structure
 
 ```
@@ -381,8 +376,6 @@ The application runs in **3 containers**:
 - UI → API: `http://api:3001` (internal Docker network)
 - API → MongoDB: `mongodb://mongodb:27017/ai-snippets`
 - External access: `localhost:3030` (UI), `localhost:3001` (API)
-
----
 
 ## 🔧 Troubleshooting
 
@@ -452,8 +445,6 @@ docker-compose --profile test run --rm test npx jest --testNamePattern="should c
 - ⚠️ **Model Tests**: Some timeouts due to MongoDB connection  
 - 🎯 **Overall**: 16/22 tests passing (~73% success rate)
 
----
-
 ## 📝 Post-Challenge Reflection
 
 ### What I'd improve with more time:
@@ -480,10 +471,33 @@ docker-compose --profile test run --rm test npx jest --testNamePattern="should c
 
 The 3-hour constraint required focusing on core functionality while maintaining code quality. The Test-Driven Development approach ensured reliability, while the containerized setup provides a solid foundation for production deployment.
 
----
-
 ## 📄 License
 
 MIT License
 
 **Repository:** https://github.com/glaucia86/ai-snippet
+
+---
+
+## 👩‍💻 **Author**
+
+<div align="center">
+
+### **Glaucia Lemos**
+
+*Software AI Engineer | ex-Microsoft*
+
+[![GitHub](https://img.shields.io/badge/GitHub-glaucia86-181717?style=for-the-badge\&logo=github)](https://github.com/glaucia86)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-glaucia--lemos-0077B5?style=for-the-badge\&logo=linkedin)](https://www.linkedin.com/in/glaucialemos/)
+[![Twitter](https://img.shields.io/badge/Twitter-@glaucia_lemos86-1DA1F2?style=for-the-badge\&logo=twitter)](https://twitter.com/glaucia_lemos86)
+[![YouTube](https://img.shields.io/badge/YouTube-@GlauciaLemos-FF0000?style=for-the-badge\&logo=youtube)](https://www.youtube.com/@GlauciaLemos)
+
+---
+
+### **⭐ Enjoyed the project? Leave a star! ⭐**
+
+**Made with ❤️ and ☕ by [Glaucia Lemos](https://github.com/glaucia86)**
+
+*Turning weather data into intelligent conversations* 🌤️🤖
+
+</div>
